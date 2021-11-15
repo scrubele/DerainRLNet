@@ -44,7 +44,6 @@ class pix2pix(data.Dataset):
         self.loader = loader
 
     def __getitem__(self, index):
-        index = np.random.randint(1, 701)
         path = self.imgs[index]
         img = self.loader(path)
         w, h = img.size
@@ -57,7 +56,7 @@ class pix2pix(data.Dataset):
             # NOTE preprocessing for each pair of images
             imgA, imgB = self.transform(imgA, imgB)
 
-        return imgA, imgB, label
+        return imgA, imgB, label, w, h
 
     def __len__(self):
 

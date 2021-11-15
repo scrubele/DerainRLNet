@@ -25,6 +25,10 @@ parser.add_argument('--model_path', type=str,
                     default='/content/gdrive/MyDrive/DerainRLNet/derain/sample/netG1_epoch_12.pth',
                     help='path to the .pth trained model')
 IS_COLAB = True
+if IS_COLAB:
+    opt = parser.parse_args(args=[])
+else:
+    opt = parser.parse_args()
 
 
 def norm_ip(img, min, max):
@@ -86,11 +90,9 @@ def test_model(model, validation_data_loader, image_size, output_directory):
 
 
 if __name__ == '__main__':
-    if IS_COLAB:
-        opt = parser.parse_args(args=[])
-
     create_exp_dir(opt.exp)
-
+    print(opt.dataset)
+    print(opt.dataroot)
     validation_data_loader = getLoader(opt.dataset,
                                        opt.dataroot,
                                        opt.image_size,  # opt.originalSize,

@@ -1,10 +1,12 @@
 from __future__ import print_function
 
 import argparse
+import pathlib
 
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.nn.parallel
+from matplotlib import pyplot as plt
 from torch import optim
 
 cudnn.benchmark = True
@@ -101,7 +103,7 @@ def train(model, optimizerG, epochTN, outputChannelSize, input1, target, k=0):
                                )
         print(f"Total number of images: {len(dataloader)}")
         for i, data in enumerate(dataloader, 0):
-            input_cpu, target_cpu, label_cpu = data
+            input_cpu, target_cpu, label_cpu, w, h = data
             batch_size = target_cpu.size(0)
 
             residual_cpu = input_cpu - target_cpu
@@ -130,14 +132,18 @@ def train(model, optimizerG, epochTN, outputChannelSize, input1, target, k=0):
             optimizerG.step()
 
             loss = L_img10.item()
+            losses.append(loss)
             print(f"Epoch: {epoch} Image: {i} L1Loss:{loss}")
 
         if epoch % 1 == 0:
             print('Finish training epoch %d' % epoch)
             torch.save(model.state_dict(), '%s/netG1_epoch_%d.pth' % (opt.exp, epoch))
+    return losses
 
 
 if __name__ == '__main__':
+    train_logger_path = pathlib.Path(opt.exp)
+    train_logger_path.mkdir(exist_ok=True, parents=True)
     trainLogger = open('%s/train.log' % opt.exp, 'w')
     create_exp_dir(opt.exp)
     # get dataloader
@@ -154,11 +160,10 @@ if __name__ == '__main__':
 
     model = net.Dense_rainall()
     # model.load_state_dict(torch.load('./sample1/netG1_epoch_95.pth'))
-    print("Train logger")
+    print("Training")
     model.train()
     model.cuda()
     model = torch.nn.DataParallel(model, [0])
-    # # model.load_state_dict(torch.load('./sample1/netG1_epoch_95.pth'))
     print("Criterions")
     criterion_class = nn.CrossEntropyLoss()
     criterionCAE = nn.L1Loss()
@@ -178,6 +183,8 @@ if __name__ == '__main__':
     input1 = Variable(input1)
 
     optimizerG = optim.Adam(model.parameters(), lr=opt.lrG, betas=(opt.beta1, 0.999), weight_decay=0.0001)
-    train(model, optimizerG, int(opt.epochTrainingNum), opt.outputChannelSize, input1, target)
+    losses = train(model, optimizerG, int(opt.epochTrainingNum), opt.outputChannelSize, input1, target)
+
+    plt.plot(np.array(losses), 'r')
 
     trainLogger.close()
