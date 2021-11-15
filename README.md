@@ -1,4 +1,4 @@
-# DerainRLNet
+# DerainRLNet [ refactored version]
 
 The CVPR2021 article associated with this repository:
 

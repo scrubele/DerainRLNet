@@ -10,19 +10,21 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from future.utils import PY2
-from builtins import range
-from builtins import object
 
-from timeit import default_timer as timer
-import os
+import collections
 import imghdr
 import io
-import platform
-import multiprocessing as mp
 import itertools
-import collections
+import multiprocessing as mp
+import os
+import platform
 import socket
+from builtins import object
+from builtins import range
+from timeit import default_timer as timer
+
+from future.utils import PY2
+
 if PY2:
     import urllib2 as urlrequest
     import urllib2 as urlerror
@@ -40,24 +42,27 @@ __author__ = """Brendt Wohlberg <brendt@ieee.org>"""
 
 import warnings
 
+
 def plot(*args, **kwargs):
     warnings.warn("sporco.util.plot is deprecated: use sporco.plot.plot",
                   PendingDeprecationWarning)
     return spl.plot(*args, **kwargs)
+
 
 def surf(*args, **kwargs):
     warnings.warn("sporco.util.surf is deprecated: use sporco.plot.surf",
                   PendingDeprecationWarning)
     return spl.surf(*args, **kwargs)
 
+
 def imview(*args, **kwargs):
     warnings.warn("sporco.util.imview is deprecated: use sporco.plot.imview",
                   PendingDeprecationWarning)
     return spl.imview(*args, **kwargs)
 
+
 # Python 2/3 unicode literal compatibility
 if PY2:
-    import codecs
     def u(x):
         """Python 2/3 compatible definition of utf8 literals"""
         return x.decode('utf8')
@@ -65,6 +70,7 @@ else:
     def u(x):
         """Python 2/3 compatible definition of utf8 literals"""
         return x
+
 
 def ntpl2array(ntpl):
     """
@@ -85,6 +91,7 @@ def ntpl2array(ntpl):
     return np.asarray((np.vstack([col for col in ntpl]), ntpl._fields,
                        ntpl.__class__.__name__))
 
+
 def array2ntpl(arr):
     """
     Convert a :class:`numpy.ndarray` object constructed by :func:`ntpl2array`
@@ -104,6 +111,7 @@ def array2ntpl(arr):
 
     cls = collections.namedtuple(arr[2], arr[1])
     return cls(*tuple(arr[0]))
+
 
 def transpose_ntpl_list(lst):
     """Transpose a list of named tuple objects (of the same type) into a
@@ -126,7 +134,8 @@ def transpose_ntpl_list(lst):
         return None
     else:
         return cls(*[[lst[k][l] for k in range(len(lst))]
-                   for l in range(len(lst[0]))])
+                     for l in range(len(lst[0]))])
+
 
 def solve_status_str(hdrtxt, fwiter=4, fpothr=2):
     """Construct header and format details for status display of an
@@ -154,16 +163,17 @@ def solve_status_str(hdrtxt, fwiter=4, fpothr=2):
     # Field width for all fields other than first depends on precision
     fwothr = fpothr + 6
     # Construct header string from hdrtxt list of column headers
-    hdrstr = ("%-*s" % (fwiter+2, hdrtxt[0])) + \
-        ((("%%-%ds " % (fwothr+1)) * (len(hdrtxt)-1)) % \
-        tuple(hdrtxt[1:]))
+    hdrstr = ("%-*s" % (fwiter + 2, hdrtxt[0])) + \
+             ((("%%-%ds " % (fwothr + 1)) * (len(hdrtxt) - 1)) % \
+              tuple(hdrtxt[1:]))
     # Construct iteration status format string
     fmtstr = ("%%%dd" % (fwiter)) + ((("  %%%d.%de" % (fwothr, fpothr)) * \
-        (len(hdrtxt)-1)))
+                                      (len(hdrtxt) - 1)))
     # Compute length of separator string
-    nsep = fwiter + (fwothr + 2)*(len(hdrtxt)-1)
+    nsep = fwiter + (fwothr + 2) * (len(hdrtxt) - 1)
 
     return hdrstr, fmtstr, nsep
+
 
 def tiledict(D, sz=None):
     """Construct an image allowing visualization of dictionary content.
@@ -210,22 +220,22 @@ def tiledict(D, sz=None):
     # Construct tiled image
     N = dsz[axisM]
     Vr = int(np.floor(np.sqrt(N)))
-    Vc = int(np.ceil(N/float(Vr)))
+    Vc = int(np.ceil(N / float(Vr)))
     if D.ndim == 4:
-        im = np.ones((Vr*mxsz[0] + Vr-1, Vc*mxsz[1] + Vc-1, dsz[2]))
+        im = np.ones((Vr * mxsz[0] + Vr - 1, Vc * mxsz[1] + Vc - 1, dsz[2]))
     else:
-        im = np.ones((Vr*mxsz[0] + Vr-1, Vc*mxsz[1] + Vc-1))
+        im = np.ones((Vr * mxsz[0] + Vr - 1, Vc * mxsz[1] + Vc - 1))
     k = 0
     for l in range(0, Vr):
         for m in range(0, Vc):
-            r = mxsz[0]*l + l
-            c = mxsz[1]*m + m
+            r = mxsz[0] * l + l
+            c = mxsz[1] * m + m
             if D.ndim == 4:
-                im[r:(r+sz[0, k]), c:(c+sz[1, k]), :] = D[0:sz[0, k],
-                                                          0:sz[1, k], :, k]
+                im[r:(r + sz[0, k]), c:(c + sz[1, k]), :] = D[0:sz[0, k],
+                                                            0:sz[1, k], :, k]
             else:
-                im[r:(r+sz[0, k]), c:(c+sz[1, k])] = D[0:sz[0, k],
-                                                       0:sz[1, k], k]
+                im[r:(r + sz[0, k]), c:(c + sz[1, k])] = D[0:sz[0, k],
+                                                         0:sz[1, k], k]
             k = k + 1
             if k >= N:
                 break
@@ -233,6 +243,7 @@ def tiledict(D, sz=None):
             break
 
     return im
+
 
 def imageblocks(imgs, blksz):
     """Extract all blocks of specified size from an image or list of images.
@@ -259,8 +270,8 @@ def imageblocks(imgs, blksz):
     for im in imgs:
         Nr, Nc = im.shape
         nr, nc = blksz
-        shape = (Nr-nr+1, Nc-nc+1, nr, nc)
-        strides = im.itemsize*np.array([Nc, 1, Nc, 1])
+        shape = (Nr - nr + 1, Nc - nc + 1, nr, nc)
+        strides = im.itemsize * np.array([Nc, 1, Nc, 1])
         sb = np.lib.stride_tricks.as_strided(np.ascontiguousarray(im),
                                              shape=shape, strides=strides)
         sb = np.ascontiguousarray(sb)
@@ -269,6 +280,7 @@ def imageblocks(imgs, blksz):
         blks = np.dstack((blks, sb))
 
     return blks
+
 
 def rgb2gray(rgb):
     """Convert an RGB image (or images) to grayscale.
@@ -285,8 +297,9 @@ def rgb2gray(rgb):
     """
 
     w = sla.atleast_nd(rgb.ndim, np.array([0.299, 0.587, 0.144],
-                        dtype=rgb.dtype, ndmin=3))
+                                          dtype=rgb.dtype, ndmin=3))
     return np.sum(w * rgb, axis=2)
+
 
 def complex_randn(*args):
     """Return a complex array of samples drawn from a standard normal
@@ -303,7 +316,8 @@ def complex_randn(*args):
       Random array of shape (d0, d1, ..., dn)
     """
 
-    return np.random.randn(*args) + 1j*np.random.randn(*args)
+    return np.random.randn(*args) + 1j * np.random.randn(*args)
+
 
 def spnoise(s, frc, smn=0.0, smx=1.0):
     """Return image with salt & pepper noise imposed on it.
@@ -330,6 +344,7 @@ def spnoise(s, frc, smn=0.0, smx=1.0):
     sn[spm < frc - 1.0] = smn
     sn[spm > 1.0 - frc] = smx
     return sn
+
 
 def tikhonov_filter(s, lmbda, npd=16):
     r"""Lowpass filter based on Tikhonov regularization.
@@ -370,16 +385,17 @@ def tikhonov_filter(s, lmbda, npd=16):
 
     grv = np.array([-1.0, 1.0]).reshape([2, 1])
     gcv = np.array([-1.0, 1.0]).reshape([1, 2])
-    Gr = sla.fftn(grv, (s.shape[0]+2*npd, s.shape[1]+2*npd), (0, 1))
-    Gc = sla.fftn(gcv, (s.shape[0]+2*npd, s.shape[1]+2*npd), (0, 1))
-    A = 1.0 + lmbda*np.conj(Gr)*Gr + lmbda*np.conj(Gc)*Gc
+    Gr = sla.fftn(grv, (s.shape[0] + 2 * npd, s.shape[1] + 2 * npd), (0, 1))
+    Gc = sla.fftn(gcv, (s.shape[0] + 2 * npd, s.shape[1] + 2 * npd), (0, 1))
+    A = 1.0 + lmbda * np.conj(Gr) * Gr + lmbda * np.conj(Gc) * Gc
     if s.ndim > 2:
-        A = A[(slice(None),)*2 + (np.newaxis,)*(s.ndim-2)]
-    sp = np.pad(s, ((npd, npd),)*2 + ((0, 0),)*(s.ndim-2), 'symmetric')
+        A = A[(slice(None),) * 2 + (np.newaxis,) * (s.ndim - 2)]
+    sp = np.pad(s, ((npd, npd),) * 2 + ((0, 0),) * (s.ndim - 2), 'symmetric')
     slp = np.real(sla.ifftn(sla.fftn(sp, axes=(0, 1)) / A, axes=(0, 1)))
-    sl = slp[npd:(slp.shape[0]-npd), npd:(slp.shape[1]-npd)]
+    sl = slp[npd:(slp.shape[0] - npd), npd:(slp.shape[1] - npd)]
     sh = s - sl
     return sl.astype(s.dtype), sh.astype(s.dtype)
+
 
 def idle_cpu_count(mincpu=1):
     """Estimate number of idle CPUs, for use by multiprocessing code
@@ -404,6 +420,7 @@ def idle_cpu_count(mincpu=1):
         ncpu = os.cpu_count()
     idle = int(ncpu - np.floor(os.getloadavg()[0]))
     return max(mincpu, idle)
+
 
 def grid_search(fn, grd, fmin=True, nproc=None):
     """Perform a grid search for optimal parameters of a specified
@@ -470,9 +487,9 @@ def grid_search(fn, grd, fmin=True, nproc=None):
         pool.join()
     if isinstance(fval[0], (tuple, list, np.ndarray)):
         nfnv = len(fval[0])
-        fvmx = np.reshape(fval, [a.size for a in grd] + [nfnv,])
+        fvmx = np.reshape(fval, [a.size for a in grd] + [nfnv, ])
         sidx = np.unravel_index(slct(fvmx.reshape((-1, nfnv)), axis=0),
-                        fvmx.shape[0:-1]) + (np.array((range(nfnv))),)
+                                fvmx.shape[0:-1]) + (np.array((range(nfnv))),)
         sprm = np.array([grd[k][sidx[k]] for k in range(len(grd))])
         sfvl = tuple(fvmx[sidx])
     else:
@@ -482,6 +499,7 @@ def grid_search(fn, grd, fmin=True, nproc=None):
         sfvl = fvmx[sidx]
 
     return sprm, sfvl, fvmx, sidx
+
 
 def convdicts():
     """Access a set of example learned convolutional dictionaries.
@@ -513,6 +531,7 @@ def convdicts():
     for k in list(npz.keys()):
         cdd[k] = npz[k]
     return cdd
+
 
 def netgetdata(url, maxtry=3, timeout=10):
     """
@@ -554,6 +573,7 @@ def netgetdata(url, maxtry=3, timeout=10):
 
     return io.BytesIO(cntnt)
 
+
 class ExampleImages(object):
     """Access a set of example images."""
 
@@ -590,10 +610,10 @@ class ExampleImages(object):
             self.bpth = pth
         self.imglst = []
         self.grpimg = {}
-        for dirpath, dirnames, filenames in  os.walk(self.bpth):
+        for dirpath, dirnames, filenames in os.walk(self.bpth):
             # It would be more robust and portable to use
             # pathlib.PurePath.relative_to
-            prnpth = dirpath[len(self.bpth)+1:]
+            prnpth = dirpath[len(self.bpth) + 1:]
             for f in filenames:
                 fpth = os.path.join(dirpath, f)
                 if imghdr.what(fpth) is not None:
@@ -720,11 +740,12 @@ class ExampleImages(object):
             if img.ndim == 2:
                 img = sni.zoom(img, zoom)
             else:
-                img = sni.zoom(img, (zoom,)*2 + (1,)*(img.ndim-2))
+                img = sni.zoom(img, (zoom,) * 2 + (1,) * (img.ndim - 2))
         if gray:
             img = rgb2gray(img)
 
         return img
+
 
 class Timer(object):
     """Timer class supporting multiple independent labelled timers.
@@ -757,7 +778,7 @@ class Timer(object):
         # immediately
         if labels is not None:
             if not isinstance(labels, (list, tuple)):
-                labels = [labels,]
+                labels = [labels, ]
             for lbl in labels:
                 self.td[lbl] = 0.0
                 self.t0[lbl] = None
@@ -779,7 +800,7 @@ class Timer(object):
         # If label is not a list or tuple, create a singleton list
         # containing it
         if not isinstance(labels, (list, tuple)):
-            labels = [labels,]
+            labels = [labels, ]
         # Iterate over specified label(s)
         t = timer()
         for lbl in labels:
@@ -815,7 +836,7 @@ class Timer(object):
         if labels == self.alllbl:
             labels = self.t0.keys()
         elif not isinstance(labels, (list, tuple)):
-            labels = [labels,]
+            labels = [labels, ]
         # Iterate over specified label(s)
         for lbl in labels:
             if lbl not in self.t0:
@@ -852,7 +873,7 @@ class Timer(object):
         if labels == self.alllbl:
             labels = self.t0.keys()
         elif not isinstance(labels, (list, tuple)):
-            labels = [labels,]
+            labels = [labels, ]
         # Iterate over specified label(s)
         for lbl in labels:
             if lbl not in self.t0:
@@ -932,7 +953,7 @@ class Timer(object):
         # Get current time
         t = timer()
         # Length of label field, calculated from max label length
-        lfldln = max([len(lbl) for lbl in self.t0] + [len(self.dfltlbl),]) + 2
+        lfldln = max([len(lbl) for lbl in self.t0] + [len(self.dfltlbl), ]) + 2
         # Header string for table of timers
         s = '%-*s  Accum.       Current\n' % (lfldln, 'Label')
         s += '-' * (lfldln + 25) + '\n'
@@ -946,6 +967,7 @@ class Timer(object):
             s += '%-*s  %.2e s  %s\n' % (lfldln, lbl, td, ts)
 
         return s
+
 
 class ContextTimer(object):
     """A wrapper class for :class:`Timer` that enables its use as a
